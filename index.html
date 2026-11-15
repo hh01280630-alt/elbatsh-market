@@ -127,8 +127,9 @@ const unitTxt=p=>p.type==='kg'?'كجم':p.type==='pack'?'عبوة':'';
 const out=p=>typeof p.stock==='number'&&p.stock<=0;
 const idx=new Map();
 
-fetch('products.json?'+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json()}).then(d=>{
-  S=d.shop||{};P=d.products||[];P.forEach((p,i)=>{p.id=i;idx.set(i,p)});
+const J=u=>fetch(u+'?'+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json()});
+Promise.all([J('products.json'),J('shop.json').catch(()=>null)]).then(([d,sh])=>{
+  S=sh||d.shop||{};P=d.products||[];P.forEach((p,i)=>{p.id=i;idx.set(i,p)});
   $('shopName').textContent=S.name||'البطش ماركت';document.title=S.name||'البطش ماركت';
   $('tagline').textContent=S.tagline||'';
   const bits=[];if(S.hours)bits.push('🕒 <b>'+esc(S.hours)+'</b>');
@@ -161,7 +162,7 @@ function card(p){
   return `<article class="card"><div class="im">${ICON[p.cat]||'📦'}${out(p)?'<span class="tag">نفد</span>':''}${img}</div>
   <div class="bd"><div class="nm">${esc(p.name)}</div><div class="pr">${fmt(p.price)} <small>${S.currency||'ج'}${p.type==='kg'?' / كجم':p.type==='pack'?' / عبوة':''}</small></div><div id="c${p.id}">${qtyCtl(p)}</div></div></article>`;
 }
-const LIMIT=1000;
+const PAGE=120;let shown=PAGE;
 function render(){
   const t=q.trim().toLowerCase();
   const L=P.filter(p=>(cat==='الكل'||p.cat===cat)&&(!t||p.name.toLowerCase().includes(t)||(p.code&&p.code.includes(t))));
@@ -170,9 +171,9 @@ function render(){
   L.sort((a,b)=>order.indexOf(a.cat)-order.indexOf(b.cat)||out(a)-out(b));
   if(!L.length){$('grid').innerHTML='<div class="empty">مفيش منتجات مطابقة</div>';return}
   let h='';
-  if(cat==='الكل'&&!t){let last='';L.slice(0,LIMIT).forEach(p=>{if(p.cat!==last){last=p.cat;h+=`<h2 class="sec">${ICON[p.cat]||''} ${esc(p.cat)}</h2>`}h+=card(p)});}
-  else h=L.slice(0,LIMIT).map(card).join('');
-  if(L.length>LIMIT)h+=`<div class="empty">فيه ${fmt(L.length-LIMIT)} منتج تاني. اختار قسم أو اكتب في البحث.</div>`;
+  if(cat==='الكل'&&!t){let last='';L.slice(0,shown).forEach(p=>{if(p.cat!==last){last=p.cat;h+=`<h2 class="sec">${ICON[p.cat]||''} ${esc(p.cat)}</h2>`}h+=card(p)});}
+  else h=L.slice(0,shown).map(card).join('');
+  if(L.length>shown)h+=`<div class="empty"><button class="add" style="padding:12px 28px" data-more="1">عرض المزيد (${fmt(L.length-shown)})</button></div>`;
   $('grid').innerHTML=h;
 }
 // image fallback chain: jpg -> png -> webp -> emoji
@@ -190,10 +191,11 @@ function lines(){
   $('ad').style.display=(mode()==='delivery'&&S.delivery!==false)?'':'none';
 }
 const mode=()=>document.querySelector('input[name=mode]:checked').value;
-document.addEventListener('click',e=>{const t=e.target.closest('[data-a],[data-m],[data-c]');if(!t)return;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a],[data-m],[data-c],[data-more]');if(!t)return;
+  if(t.dataset.more){shown+=PAGE*2;render();return}
   if(t.dataset.a!=null)chg(+t.dataset.a,1);else if(t.dataset.m!=null)chg(+t.dataset.m,-1);
-  else{cat=t.dataset.c;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.c===cat));render();scrollTo({top:0})}});
-$('q').addEventListener('input',e=>{q=e.target.value;render()});
+  else{cat=t.dataset.c;shown=PAGE;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.c===cat));render();scrollTo({top:0})}});
+$('q').addEventListener('input',e=>{q=e.target.value;shown=PAGE;render()});
 $('cartBtn').onclick=()=>{lines();$('sheet').classList.add('on');document.body.style.overflow='hidden'};
 const closeS=()=>{$('sheet').classList.remove('on');document.body.style.overflow=''};
 $('close').onclick=closeS;$('sheet').addEventListener('click',e=>{if(e.target===$('sheet'))closeS()});
