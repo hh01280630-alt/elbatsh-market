@@ -73,6 +73,8 @@ header{background:var(--pri);color:#fff;position:sticky;top:0;z-index:20;box-sha
 .seg input{display:none}.seg input:checked+span{color:var(--pri)}.seg label:has(input:checked){border-color:var(--pri);background:var(--pri-l)}
 .f{display:grid;gap:8px}.f input,.f textarea{width:100%;border:1px solid var(--line);background:var(--card);border-radius:11px;padding:11px 12px}
 .f input:focus,.f textarea:focus,.search input:focus{outline:2px solid var(--pri);outline-offset:1px}
+.sheetx{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.5);display:none}.sheetx.on{display:flex;justify-content:center;align-items:flex-end}
+.segl{border:1.5px solid var(--line);border-radius:12px;padding:10px;text-align:center;cursor:pointer;font-weight:600;background:var(--card)}.segl input{display:none}.segl:has(input:checked){border-color:var(--pri);background:var(--pri-l);color:var(--pri)}
 .err{color:var(--warn);background:var(--warn-l);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14px;display:none}
 .send{width:100%;margin-top:10px;border:0;background:#25a244;color:#fff;font-weight:800;font-size:17px;padding:14px;border-radius:13px;cursor:pointer}
 .alt{display:none;margin-top:10px;padding:12px;border:1px dashed var(--pri);border-radius:12px;background:var(--pri-l)}
@@ -80,20 +82,49 @@ header{background:var(--pri);color:#fff;position:sticky;top:0;z-index:20;box-sha
 .note{color:var(--mut);font-size:12.5px;margin:10px 0 0}
 footer{color:var(--mut);font-size:12.5px;text-align:center;padding:10px 16px 20px}
 #msg{padding:60px 16px;text-align:center;color:var(--mut)}
+.ann{background:var(--ink);color:var(--bg);text-align:center;font-size:13px;padding:7px 16px;font-weight:600}
+.hero{padding:14px 0 0}
+.vp{overflow:hidden;border-radius:18px;direction:rtl;touch-action:pan-y}
+.trk{display:flex;transition:transform .5s ease}
+.sl{flex:0 0 100%;min-height:150px;padding:22px 22px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;border:0;font:inherit;text-align:right;background:linear-gradient(120deg,var(--b1),var(--b2))}
+.sl h3{margin:0 0 4px;font-size:clamp(20px,4.5vw,30px);font-weight:800;line-height:1.25}.sl p{margin:0 0 10px;opacity:.92;font-size:clamp(13px,2.8vw,16px)}
+.sl .cta{display:inline-block;background:#fff;color:#16201a;font-weight:700;padding:6px 16px;border-radius:99px;font-size:13px}
+.sl .ic{font-size:clamp(54px,14vw,96px);line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+.sl img{max-height:130px;max-width:38%;object-fit:contain;border-radius:12px}
+.dots{display:flex;justify-content:center;gap:6px;padding:9px 0 2px}
+.dots button{width:8px;height:8px;border-radius:99px;border:0;background:var(--line);padding:0;cursor:pointer;transition:width .3s}
+.dots button.on{background:var(--pri);width:22px}
+.about{background:var(--card);border-top:1px solid var(--line);margin-top:10px;padding:26px 0 8px}
+.about h2{margin:0 0 12px;font-size:18px}
+.br{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.bc{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:14px}
+.bc b{display:block;margin-bottom:2px}.bc small{color:var(--mut);display:block;margin-bottom:8px}
+.bc a{display:inline-block;margin-inline-end:8px;margin-top:4px;color:var(--pri);font-weight:700;text-decoration:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:5px 12px;font-size:13.5px;direction:ltr}
+.soc{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.soc a,.soc button{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:700;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.soc .fb{background:#1877f2;color:#fff;border-color:#1877f2}.soc .wa{background:#25a244;color:#fff;border-color:#25a244}.soc .fd{background:var(--pri-l);color:var(--pri);border-color:var(--pri)}
+.seg3{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+@media(prefers-reduced-motion:reduce){.trk{transition:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 :focus-visible{outline:2px solid var(--pri);outline-offset:2px}
 </style>
 </head>
 <body>
+<div class="ann" id="ann" hidden></div>
 <header id="hd"><div class="wrap">
   <div class="top"><img src="logo.png" alt="شعار البطش ماركت"><div><h1 id="shopName">البطش ماركت</h1><p id="tagline"></p></div></div>
   <div class="search"><input id="q" type="search" placeholder="ابحث عن منتج…" autocomplete="off"></div>
 </div></header>
 <nav class="tabs" id="tabsBox"><div class="wrap" id="tabs"></div></nav>
 <div class="wrap">
+  <section class="hero" id="hero" hidden><div class="vp" id="vp"><div class="trk" id="trk"></div></div><div class="dots" id="dots"></div></section>
   <div class="strip" id="strip"></div>
   <main class="grid" id="grid"><div id="msg">جاري تحميل المنتجات…</div></main>
 </div>
+<section class="about" id="about"><div class="wrap">
+  <h2 id="brH" hidden>فروعنا</h2><div class="br" id="br"></div>
+  <div class="soc" id="soc"></div>
+</div></section>
 <footer id="foot"></footer>
 <div id="bar" hidden><button id="cartBtn"><span><span class="cnt" id="cnt">0</span>عرض السلة</span><span id="barTot"></span></button></div>
 
@@ -115,6 +146,15 @@ footer{color:var(--mut);font-size:12.5px;text-align:center;padding:10px 16px 20p
   <p class="note">الأسعار استرشادية، والمحل هيأكد الطلب والإجمالي النهائي معاك على واتساب.</p>
 </div></div>
 
+<div id="fsheet" class="sheetx" role="dialog" aria-modal="true" aria-label="شكاوي ومقترحات"><div class="panel">
+  <div class="ph"><h2>شكاوي ومقترحات</h2><button class="x" id="fclose" aria-label="إغلاق">✕</button></div>
+  <p class="note" style="margin-top:6px">رأيك يهمنا. اكتب شكوتك أو اقتراحك وهيوصل لإدارة المحل على واتساب.</p>
+  <div class="seg3" id="fseg"><label class="segl"><input type="radio" name="ft" value="شكوى" checked><span>⚠️ شكوى</span></label><label class="segl"><input type="radio" name="ft" value="اقتراح"><span>💡 اقتراح</span></label></div>
+  <div class="f"><input id="fn" placeholder="الاسم (اختياري)" autocomplete="name"><input id="fp" type="tel" inputmode="tel" placeholder="رقم الموبايل (اختياري، لو عايزين نرد عليك)" autocomplete="tel"><textarea id="fm" rows="4" placeholder="اكتب هنا…"></textarea></div>
+  <div class="err" id="ferr"></div>
+  <button class="send" id="fsend">إرسال على واتساب</button>
+  <div class="alt" id="falt"><b>لو واتساب ماتفتحش، جرّب:</b><a id="fa1" target="_blank" rel="noopener">فتح واتساب</a><a id="fa2" target="_blank" rel="noopener">رابط بديل</a><button id="fcp" type="button">نسخ الرسالة</button></div>
+</div></div>
 <script>
 "use strict";
 const ICON={'حلويات وبسكوتات':'🍪','بقاله':'🛒','ألبان وأجبان':'🧀','منظفات':'🧴','مشروبات':'🥤','مجمدات':'🧊','شيكولاتات':'🍫','مستورد':'🌍','مخللات':'🥒','شيبسي وتسالي':'🥔','بيض':'🥚','مخبوزات':'🥖','عطارة':'🌿','أخرى':'📦'};
@@ -141,7 +181,7 @@ Promise.all([J('products.json'),J('shop.json').catch(()=>null)]).then(([d,sh])=>
   if(d.updated)$('foot').textContent='آخر تحديث للأسعار: '+d.updated;
   // drop cart lines whose product no longer exists / is out of stock
   for(const k of Object.keys(cart)){const p=idx.get(+k);if(!p||out(p))delete cart[k]}
-  buildTabs();render();updBar();fixTabs();
+  extras();buildTabs();render();updBar();fixTabs();
 }).catch(()=>{$('msg').innerHTML='تعذر تحميل المنتجات.<br>افتح الموقع من الرابط المنشور، مش من الملف مباشرة.'});
 
 function fixTabs(){const h=$('hd').offsetHeight;$('tabsBox').style.setProperty('--hh',h+'px')}
@@ -204,6 +244,52 @@ const closeS=()=>{$('sheet').classList.remove('on');document.body.style.overflow
 $('close').onclick=closeS;$('sheet').addEventListener('click',e=>{if(e.target===$('sheet'))closeS()});
 document.querySelectorAll('input[name=mode]').forEach(r=>r.onchange=lines);
 ['nm','ph','ad'].forEach(id=>{const v=store.get('f_'+id);if(v)$(id).value=v});
+
+/* ---- إعلانات / فروع / سوشيال / شكاوي ---- */
+const tel=n=>String(n).replace(/\D/g,'');
+function waLinks(msg){const w=String(S.whatsapp||'').replace(/\D/g,''),enc=encodeURIComponent(msg);return[`https://api.whatsapp.com/send?phone=${w}&text=${enc}`,`https://wa.me/${w}?text=${enc}`]}
+function extras(){
+  if(S.announcement){$('ann').textContent=S.announcement;$('ann').hidden=false}
+  // banners
+  const B=(S.banners||[]).filter(b=>b&&b.title);
+  if(B.length){
+    $('hero').hidden=false;
+    $('trk').innerHTML=B.map((b,i)=>`<button class="sl" data-bi="${i}" style="--b1:${esc(b.bg||'#1f7a3f')};--b2:${esc(b.bg2||b.bg||'#16592d')}"><div><h3>${esc(b.title)}</h3><p>${esc(b.text||'')}</p>${(b.search||b.cat||b.goto||b.url)?'<span class="cta">'+esc(b.cta||'شوف دلوقتي')+'</span>':''}</div>${b.image?`<img src="${esc(b.image)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="ic">${esc(b.icon||'🛒')}</span>`}</button>`).join('');
+    $('dots').innerHTML=B.length>1?B.map((_,i)=>`<button data-di="${i}" aria-label="إعلان ${i+1}"></button>`).join(''):'';
+    let cur=0,timer=null;
+    const go=i=>{cur=(i+B.length)%B.length;$('trk').style.transform=`translateX(${cur*100}%)`;[...$('dots').children].forEach((d,k)=>d.classList.toggle('on',k===cur))};
+    const auto=()=>{clearInterval(timer);if(B.length>1&&!matchMedia('(prefers-reduced-motion:reduce)').matches)timer=setInterval(()=>go(cur+1),5000)};
+    go(0);auto();
+    $('dots').onclick=e=>{const d=e.target.closest('[data-di]');if(d){go(+d.dataset.di);auto()}};
+    let x0=null;const vp=$('vp');
+    vp.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
+    vp.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40){go(cur+(dx>0?1:-1));auto()}},{passive:true});
+    vp.addEventListener('click',e=>{const s=e.target.closest('[data-bi]');if(!s)return;const b=B[+s.dataset.bi];
+      if(b.url){window.open(b.url,'_blank','noopener')}
+      else if(b.goto==='branches'){$('about').scrollIntoView({behavior:'smooth'})}
+      else if(b.cat||b.search){cat=b.cat||'الكل';q=b.search||'';$('q').value=q;shown=PAGE;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.c===cat));render();$('grid').scrollIntoView({behavior:'smooth'})}});
+  }
+  // فروع
+  const br=S.branches||[];
+  if(br.length){$('brH').hidden=false;$('br').innerHTML=br.map(b=>`<div class="bc"><b>📍 ${esc(b.name||'')}</b><small>${esc(b.address||'')}</small>${(b.phones||[]).map(p=>`<a href="tel:${tel(p)}">📞 ${esc(p)}</a>`).join('')}</div>`).join('')}
+  // سوشيال وتواصل
+  let so='';
+  if(S.whatsapp)so+=`<a class="wa" href="https://wa.me/${tel(S.whatsapp)}" target="_blank" rel="noopener">💬 واتساب</a>`;
+  if(S.facebook)so+=`<a class="fb" href="${esc(S.facebook)}" target="_blank" rel="noopener">📘 صفحتنا على فيسبوك</a>`;
+  so+=`<button class="fd" id="fopen" type="button">📝 شكاوي ومقترحات</button>`;
+  $('soc').innerHTML=so;$('fopen').onclick=()=>{$('fsheet').classList.add('on');document.body.style.overflow='hidden'};
+}
+const closeF=()=>{$('fsheet').classList.remove('on');document.body.style.overflow=''};
+$('fclose').onclick=closeF;$('fsheet').addEventListener('click',e=>{if(e.target===$('fsheet'))closeF()});
+let fMsg='';
+$('fsend').onclick=()=>{const er=$('ferr');er.style.display='none';const m=$('fm').value.trim();
+  if(m.length<5){er.textContent='اكتب رسالتك الأول';er.style.display='block';return}
+  const type=document.querySelector('input[name=ft]:checked').value;
+  fMsg=`*${type} من الموقع*\n\n${m}`+($('fn').value.trim()?`\n\nالاسم: ${$('fn').value.trim()}`:'')+($('fp').value.trim()?`\nالموبايل: ${$('fp').value.trim()}`:'');
+  const[a,b]=waLinks(fMsg);$('fa1').href=a;$('fa2').href=b;$('falt').style.display='block';
+  window.open(a,'_blank')||(location.href=a)};
+$('fcp').onclick=()=>{const done=()=>{$('fcp').textContent='تم النسخ ✓ الصقها في واتساب'};
+  if(navigator.clipboard)navigator.clipboard.writeText(fMsg).then(done,()=>prompt('انسخ الرسالة:',fMsg));else prompt('انسخ الرسالة:',fMsg)};
 
 let lastMsg='';
 $('send').onclick=()=>{
