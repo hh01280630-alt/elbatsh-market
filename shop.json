@@ -8,7 +8,7 @@
  "minOrder": 0,
  "currency": "ج",
  "announcement": "🛵 اطلب من الموقع وابعت طلبك على واتساب، والمحل هيأكده معاك",
- "facebook": "",
+ "facebook": "https://www.facebook.com/share/1RQUS9t2Jv/",
  "phones": [
   "01055656685",
   "01094666485"
@@ -41,11 +41,14 @@
   },
   {
    "title": "لبن جاموسي سايب",
-   "text": "اطلب ربع أو نص أو كيلو",
+   "text": "الكيلو بـ 42 ج بدل 45 ج. اطلب ربع أو نص أو كيلو",
    "bg": "#0f4c75",
    "bg2": "#1b6ca8",
    "icon": "🥛",
-   "search": "لبن جاموسي"
+   "search": "لبن جاموسي",
+   "badge": "عرض",
+   "image": "images/banner-milk.jpg",
+   "cta": "اطلب دلوقتي"
   },
   {
    "title": "فرعين في خدمتك",
@@ -55,5 +58,8 @@
    "icon": "📍",
    "goto": "branches"
   }
- ]
+ ],
+ "offers": {
+  "لبن جاموسي سايب": 45
+ }
 }
