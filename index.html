@@ -49,6 +49,7 @@ header{background:var(--pri);color:#fff;position:sticky;top:0;z-index:20;box-sha
 .pr{font-weight:800;font-size:17px;color:var(--pri);font-variant-numeric:tabular-nums}.pr small{font-size:12px;color:var(--mut);font-weight:600}
 .add{margin-top:auto;border:0;background:var(--pri);color:#fff;font-weight:700;padding:10px;border-radius:11px;cursor:pointer}
 .add:hover{background:var(--pri-d)}.add[disabled]{background:var(--line);color:var(--mut);cursor:not-allowed}
+.qk{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.qk button{border:1px solid var(--pri);background:var(--pri-l);color:var(--pri);font-weight:700;padding:9px 2px;border-radius:10px;cursor:pointer;font-size:13px}.qk button:hover{background:var(--pri);color:#fff}
 .qty{margin-top:auto;display:flex;align-items:center;justify-content:space-between;background:var(--pri-l);border-radius:11px;padding:3px}
 .qty button{width:38px;height:38px;border:0;border-radius:9px;background:var(--pri);color:#fff;font-size:21px;cursor:pointer;line-height:1}
 .qty span{font-weight:800;font-variant-numeric:tabular-nums}
@@ -153,12 +154,13 @@ function buildTabs(){
 function qtyCtl(p){
   const n=cart[p.id];
   if(out(p))return '<button class="add" disabled>نفد</button>';
+  if(!n&&p.type==='kg')return `<div class="qk" role="group" aria-label="اختار الكمية"><button data-w="${p.id}:0.25">ربع</button><button data-w="${p.id}:0.5">نص</button><button data-w="${p.id}:1">١ كجم</button></div>`;
   return n?`<div class="qty"><button data-m="${p.id}" aria-label="إنقاص">−</button><span>${fmt(n)}${unitTxt(p)?' '+unitTxt(p):''}</span><button data-a="${p.id}" aria-label="زيادة">+</button></div>`
           :`<button class="add" data-a="${p.id}">أضف للسلة</button>`;
 }
 function card(p){
-  const code=p.code?esc(p.code):'';
-  const img=code?`<img loading="lazy" alt="${esc(p.name)}" src="images/${code}.jpg" data-code="${code}" data-try="0">`:'';
+  const code=esc(p.code||p.name);
+  const img=code?`<img loading="lazy" alt="${esc(p.name)}" src="images/${encodeURIComponent(p.code||p.name)}.jpg" data-code="${encodeURIComponent(p.code||p.name)}" data-try="0">`:'';
   return `<article class="card"><div class="im">${ICON[p.cat]||'📦'}${out(p)?'<span class="tag">نفد</span>':''}${img}</div>
   <div class="bd"><div class="nm">${esc(p.name)}</div><div class="pr">${fmt(p.price)} <small>${S.currency||'ج'}${p.type==='kg'?' / كجم':p.type==='pack'?' / عبوة':''}</small></div><div id="c${p.id}">${qtyCtl(p)}</div></div></article>`;
 }
@@ -191,8 +193,9 @@ function lines(){
   $('ad').style.display=(mode()==='delivery'&&S.delivery!==false)?'':'none';
 }
 const mode=()=>document.querySelector('input[name=mode]:checked').value;
-document.addEventListener('click',e=>{const t=e.target.closest('[data-a],[data-m],[data-c],[data-more]');if(!t)return;
+document.addEventListener('click',e=>{const t=e.target.closest('[data-a],[data-m],[data-c],[data-more],[data-w]');if(!t)return;
   if(t.dataset.more){shown+=PAGE*2;render();return}
+  if(t.dataset.w){const[i,w]=t.dataset.w.split(':');const p=idx.get(+i);if(p&&!out(p)){cart[i]=+w;const el=$('c'+i);if(el)el.innerHTML=qtyCtl(p);updBar()}return}
   if(t.dataset.a!=null)chg(+t.dataset.a,1);else if(t.dataset.m!=null)chg(+t.dataset.m,-1);
   else{cat=t.dataset.c;shown=PAGE;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.c===cat));render();scrollTo({top:0})}});
 $('q').addEventListener('input',e=>{q=e.target.value;shown=PAGE;render()});
