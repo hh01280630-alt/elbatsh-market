@@ -241,12 +241,14 @@ function ctl(p){
 function card(p){
   const k=encodeURIComponent(p.key);
   const tag=out(p)?'<span class="tag no">نفد</span>':p.old?`<span class="tag">وفّر ${fmt(p.old-p.price)} ${cur()}</span>`:'';
-  return `<article class="card${out(p)?' oos':''}" data-pid="${p.id}"><div class="im">${catIcon(p.cat)}${tag}<img loading="lazy" alt="${esc(p.name)}" src="images/${k}.jpg" data-code="${k}" data-try="0"><button class="hrt${favs.has(p.key)?' on':''}" data-f="${p.id}" aria-label="مفضلة">${favs.has(p.key)?'♥':'♡'}</button></div>
+  return `<article class="card${out(p)?' oos':''}" data-pid="${p.id}"><div class="im">${catIcon(p.cat)}${tag}<img loading="lazy" alt="${esc(p.name)}" ${imgAttr(p)}><button class="hrt${favs.has(p.key)?' on':''}" data-f="${p.id}" aria-label="مفضلة">${favs.has(p.key)?'♥':'♡'}</button></div>
   <div class="bd"><div class="nm">${esc(p.name)}</div><div class="pr">${fmt(p.price)}${p.old?` <s>${fmt(p.old)}</s>`:''} <small>${cur()}${p.type==='kg'?' / كجم':p.type==='pack'?' / عبوة':''}</small></div><div class="ctl" data-ctl="${p.id}">${ctl(p)}</div></div></article>`;
 }
 /* سلسلة بدائل الصورة: jpg ← png ← webp ← أيقونة القسم */
-document.addEventListener('error',e=>{const im=e.target;if(im.tagName!=='IMG'||!im.dataset.code)return;
-  const ex=['jpg','png','webp'],n=+im.dataset.try+1;if(n<ex.length){im.dataset.try=n;im.src='images/'+im.dataset.code+'.'+ex[n]}else im.remove()},true);
+const imgList=p=>{const L=[];[p.code,p.name].forEach(b=>{if(b)['jpg','png','webp'].forEach(x=>L.push('images/'+encodeURIComponent(b)+'.'+x))});return L};
+const imgAttr=p=>{const L=imgList(p);return `src="${L[0]||''}" data-i="${p.id}" data-try="0"`};
+document.addEventListener('error',e=>{const im=e.target;if(im.tagName!=='IMG'||im.dataset.i==null)return;
+  const L=imgList(idx.get(+im.dataset.i)),n=+im.dataset.try+1;if(n<L.length){im.dataset.try=n;im.src=L[n]}else im.remove()},true);
 const inStockFirst=l=>l.slice().sort((a,b)=>out(a)-out(b));
 const row=(title,list,href)=>list.length?`<div class="sh"><h2>${esc(title)}</h2>${href?`<a href="${href}">عرض الكل</a>`:''}</div><div class="hrow">${inStockFirst(list).slice(0,12).map(card).join('')}</div>`:'';
 
@@ -343,7 +345,7 @@ function openP(id,push){
   const p=idx.get(+id);if(!p)return;curP=p;const k=encodeURIComponent(p.key),o=out(p);
   const alts=inStockFirst(P.filter(x=>x.cat===p.cat&&x.id!==p.id)).slice(0,12);
   const ct=CATS.find(c=>c.name===p.cat);
-  $('pbody').innerHTML=`<div class="pim${o?' oos':''}">${catIcon(p.cat)}<img alt="${esc(p.name)}" src="images/${k}.jpg" data-code="${k}" data-try="0"></div>
+  $('pbody').innerHTML=`<div class="pim${o?' oos':''}">${catIcon(p.cat)}<img alt="${esc(p.name)}" ${imgAttr(p)}></div>
    <div class="pi"><div class="pn"><h2>${esc(p.name)}</h2><button class="hrt${favs.has(p.key)?' on':''}" data-f="${p.id}" aria-label="مفضلة">${favs.has(p.key)?'♥':'♡'}</button></div>
    <div class="chp">${ct?`<a href="#c${ct.i}" id="pcat">${esc(p.cat)}</a>`:''}${p.type==='kg'?'<span>بالوزن</span>':p.type==='pack'?'<span>عبوة</span>':''}</div>
    <div class="pp"><b>${fmt(p.price)} ${cur()}</b>${p.old?`<s>${fmt(p.old)} ${cur()}</s>`:''}<small style="color:var(--mut)">${p.type==='kg'?'/ كجم':p.type==='pack'?'/ عبوة':''}</small></div>
