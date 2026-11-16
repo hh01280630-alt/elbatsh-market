@@ -221,7 +221,7 @@ const catIcon=c=>ICON[c]||'📦';
 const J=u=>fetch(u+'?'+Date.now()).then(r=>{if(!r.ok)throw 0;return r.json()});
 Promise.all([J('products.json'),J('shop.json').catch(()=>null)]).then(([d,sh])=>{
   S=sh||d.shop||{};P=d.products||[];const OF=S.offers||{};
-  P.forEach((p,i)=>{p.id=i;p.key=p.code||p.name;idx.set(i,p);byKey.set(p.key,p);const o=Number(OF[p.code]||OF[p.name]);if(o>p.price)p.old=o});
+  P.forEach((p,i)=>{p.id=i;p.key=p.code||p.name;idx.set(i,p);byKey.set(p.key,p);const o=Number(p.old||OF[p.code]||OF[p.name]);p.old=o>p.price?o:0});
   const cn=new Map();P.forEach(p=>cn.set(p.cat,(cn.get(p.cat)||0)+1));
   CATS=[...cn].map(([name,count],i)=>({name,count,i}));
   const sc=store.get('cart_v3')||{};for(const k in sc){const p=byKey.get(k);if(p&&!out(p))cart[p.id]=sc[k]}
@@ -254,9 +254,11 @@ const row=(title,list,href)=>list.length?`<div class="sh"><h2>${esc(title)}</h2>
 let heroTimer=null;
 const V=$('view');
 function homeView(){
-  const B=(S.banners||[]).filter(b=>b&&b.title);
+  const COL=[['#c2410c','#ea580c'],['#0f4c75','#1b6ca8'],['#7a3b12','#a8561d']];
+  const offB=P.filter(p=>p.old&&!out(p)).sort((a,b)=>(b.old-b.price)-(a.old-a.price)).slice(0,3).map((p,i)=>({title:p.name,text:`${fmt(p.price)} ${cur()} بدل ${fmt(p.old)} ${cur()}`,badge:`وفّر ${fmt(p.old-p.price)} ${cur()}`,bg:COL[i][0],bg2:COL[i][1],image:`images/${encodeURIComponent(p.key)}.jpg`,icon:catIcon(p.cat),pid:p.id,cta:'اطلب دلوقتي'}));
+  const B=[...offB,...(S.banners||[]).filter(b=>b&&b.title)];
   let h='<div class="wrap">';
-  if(B.length){h+=`<section class="hero"><div class="vp" id="vp"><div class="trk" id="trk">${B.map((b,i)=>`<button class="sl" data-bi="${i}" style="--b1:${esc(b.bg||'#1f7a3f')};--b2:${esc(b.bg2||b.bg||'#16592d')}"><div>${b.badge?`<span class="bdg">${esc(b.badge)}</span><br>`:''}<h3>${esc(b.title)}</h3><p>${esc(b.text||'')}</p>${(b.search||b.cat||b.goto||b.url)?`<span class="cta">${esc(b.cta||'شوف دلوقتي')}</span>`:''}</div>${b.image?`<img src="${esc(b.image)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="ic">${esc(b.icon||'🛒')}</span>`}</button>`).join('')}</div></div>${B.length>1?`<div class="dots" id="dots">${B.map((_,i)=>`<button data-di="${i}" aria-label="إعلان ${i+1}"></button>`).join('')}</div>`:''}</section>`}
+  if(B.length){h+=`<section class="hero"><div class="vp" id="vp"><div class="trk" id="trk">${B.map((b,i)=>`<button class="sl" data-bi="${i}" style="--b1:${esc(b.bg||'#1f7a3f')};--b2:${esc(b.bg2||b.bg||'#16592d')}"><div>${b.badge?`<span class="bdg">${esc(b.badge)}</span><br>`:''}<h3>${esc(b.title)}</h3><p>${esc(b.text||'')}</p>${(b.search||b.cat||b.goto||b.url||b.pid!=null)?`<span class="cta">${esc(b.cta||'شوف دلوقتي')}</span>`:''}</div>${b.image?`<img src="${esc(b.image)}" alt="" loading="lazy" data-ic="${esc(b.icon||'🛒')}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ic',textContent:this.dataset.ic}))">`:`<span class="ic">${esc(b.icon||'🛒')}</span>`}</button>`).join('')}</div></div>${B.length>1?`<div class="dots" id="dots">${B.map((_,i)=>`<button data-di="${i}" aria-label="إعلان ${i+1}"></button>`).join('')}</div>`:''}</section>`}
   h+=`<h2 class="h">اختصاراتك</h2><div class="shorts"><a href="#more"><span>🏪</span>فروعنا</a><button id="shFb" type="button"><span>📝</span>شكاوي ومقترحات</button><a href="#favs"><span>♡</span>المفضلة</a>${S.whatsapp?`<a href="https://wa.me/${tel(S.whatsapp)}" target="_blank" rel="noopener"><span>💬</span>واتساب</a>`:''}</div>`;
   h+=row('عروض مخصوصة علشانك',P.filter(p=>p.old),'#offers');
   h+=`<div class="sh"><h2>الأقسام</h2><a href="#cats">عرض الكل</a></div><div class="ctiles">${CATS.slice(0,5).map(c=>`<a class="tile" href="#c${c.i}"><span class="ti">${catIcon(c.name)}</span>${esc(c.name)}</a>`).join('')}<a class="tile all" href="#cats"><span class="ti">＋</span>عرض الكل</a></div>`;
@@ -276,7 +278,8 @@ function startHero(B){
   vp.addEventListener('touchstart',e=>{x0=e.touches[0].clientX},{passive:true});
   vp.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40){go(c+(dx>0?1:-1));auto()}},{passive:true});
   vp.addEventListener('click',e=>{const s=e.target.closest('[data-bi]');if(!s)return;const b=B[+s.dataset.bi];
-    if(b.url)window.open(b.url,'_blank','noopener');
+    if(b.pid!=null)openP(b.pid);
+    else if(b.url)window.open(b.url,'_blank','noopener');
     else if(b.goto==='branches')location.hash='#more';
     else if(b.cat){const ct=CATS.find(x=>x.name===b.cat);if(ct)location.hash='#c'+ct.i}
     else if(b.search){$('q').value=b.search;onSearch()}});
